@@ -1,0 +1,11 @@
+services:
+  db:
+    image: postgres:latest
+    container_name: postgres_separacao
+    environment:
+      POSTGRES_USER: mestre
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: db_producao
+    ports:
+      - "5432:5432"
+    restart: always
