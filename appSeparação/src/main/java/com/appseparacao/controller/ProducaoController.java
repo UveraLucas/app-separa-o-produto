@@ -18,9 +18,11 @@ public class ProducaoController {
 	private ProdutividadeService service;
 	
 	@PostMapping("/iniciar")
-	public ResponseEntity<LogProdutividade> iniciar(@RequestParam String nome, @RequestParam String tipo) {
-        return ResponseEntity.ok(service.iniciarTarefa(nome, tipo));
-    }
+	public ResponseEntity<LogProdutividade> iniciar(
+		    @RequestParam String Usuario_erp, 
+		    @RequestParam String numeroPedido) {
+		    return ResponseEntity.ok(service.iniciarTarefa(Usuario_erp, numeroPedido));
+	}
 
     @PostMapping("/finalizar/{id}")
     public ResponseEntity<LogProdutividade> finalizar(@PathVariable Long id, @RequestParam Integer qtd) {
