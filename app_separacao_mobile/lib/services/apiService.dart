@@ -1,51 +1,94 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../models/Usuario.dart';
+import '../models/Pedidos.dart';
+import '../models/ItemPedido.dart';
 import '../models/logProdutividade.dart';
 
 class ApiService {
-  // Endereço especial para o Emulador Android acessar o localhost do PC
-  static const String baseUrl = 'http://10.0.2.2:8080/api/producao';
+  // Ajuste o IP conforme necessário (10.0.2.2 para emulador, IP da máquina para USB)
+  // static const String baseUrl = 'http://10.0.2.2:8080/api'; 
+  static const String baseUrl = 'http://127.0.0.1:8080/api'; 
 
-  // Método para INICIAR a tarefa
-  Future<LogProdutividade> iniciarTrabalho(String matricula, String numeroPedido) async {
-    // Monta a URL com os parâmetros (Query Params)
-    // Ex: http://10.0.2.2:8080/api/producao/iniciar?matricula=mestre123&numeroPedido=ERP-001
-    final uri = Uri.parse('$baseUrl/iniciar').replace(queryParameters: {
-      'matricula': matricula, // Confira se no Java está 'matricula' ou 'Usuario_erp'
-      'numeroPedido': numeroPedido,
+  // --- AUTENTICAÇÃO ---
+  Future<Usuario> login(String matricula, String senha) async {
+    final uri = Uri.parse('$baseUrl/auth/login').replace(queryParameters: {
+      'matricula': matricula,
+      'senha': senha,
     });
 
-    try {
-      final response = await http.post(uri);
+    final response = await http.post(uri);
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        // Sucesso! Converte o JSON em objeto Dart
-        return LogProdutividade.fromJson(jsonDecode(response.body));
-      } else {
-        // Erro vindo do servidor (ex: Usuário não encontrado - 404, Bad Request - 400)
-        throw Exception('Erro ao iniciar: ${response.body}');
-      }
-    } catch (e) {
-      throw Exception('Falha na conexão: $e');
+    if (response.statusCode == 200) {
+      return Usuario.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Login falhou: ${response.body}');
     }
   }
 
-  // Método para FINALIZAR a tarefa
-  Future<LogProdutividade> finalizarTrabalho(int logId, int quantidade) async {
-    final uri = Uri.parse('$baseUrl/finalizar/$logId').replace(queryParameters: {
-      'qtd': quantidade.toString(),
+  // --- PEDIDOS ---
+  Future<List<Pedido>> getPedidosPorStatus(String status) async {
+    final uri = Uri.parse('$baseUrl/pedidos/listar/$status');
+    final response = await http.get(uri);
+
+    if (response.statusCode == 200) {
+      List<dynamic> body = jsonDecode(response.body);
+      return body.map((item) => Pedido.fromJson(item)).toList();
+    } else {
+      return [];
+    }
+  }
+
+  // --- ITENS E OPERAÇÃO ---
+  Future<List<ItemPedido>> getItensDoPedido(int pedidoId) async {
+    final uri = Uri.parse('$baseUrl/producao/$pedidoId/itens');
+    final response = await http.get(uri);
+
+    if (response.statusCode == 200) {
+      List<dynamic> body = jsonDecode(response.body);
+      return body.map((item) => ItemPedido.fromJson(item)).toList();
+    } else {
+      throw Exception('Erro ao carregar itens');
+    }
+  }
+
+  Future<void> biparProduto(int pedidoId, String codigoBarras) async {
+    final uri = Uri.parse('$baseUrl/producao/$pedidoId/bipar').replace(queryParameters: {
+      'codigoBarras': codigoBarras,
+    });
+    
+    final response = await http.post(uri);
+    if (response.statusCode != 200) {
+      throw Exception(response.body); 
+    }
+  }
+
+  Future<LogProdutividade> iniciarTrabalho(String matricula, String numeroPedido) async {
+    final uri = Uri.parse('$baseUrl/producao/iniciar').replace(queryParameters: {
+      'matricula': matricula,
+      'numeroPedido': numeroPedido,
     });
 
-    try {
-      final response = await http.post(uri);
+    final response = await http.post(uri);
 
-      if (response.statusCode == 200) {
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return LogProdutividade.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Erro ao iniciar: ${response.body}');
+    }
+  }
+
+  Future<LogProdutividade> finalizarTrabalho(int logId, int quantidade) async {
+     final uri = Uri.parse('$baseUrl/producao/finalizar/$logId').replace(queryParameters: {
+      'qtd': quantidade.toString(),
+    });
+    
+    final response = await http.post(uri);
+    
+    if (response.statusCode == 200) {
         return LogProdutividade.fromJson(jsonDecode(response.body));
-      } else {
-        throw Exception('Erro ao finalizar: ${response.body}');
-      }
-    } catch (e) {
-      throw Exception('Falha na conexão: $e');
+    } else {
+        throw Exception('Erro: ${response.body}');
     }
   }
 }

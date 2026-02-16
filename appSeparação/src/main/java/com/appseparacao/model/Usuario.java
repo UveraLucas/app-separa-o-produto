@@ -15,6 +15,17 @@ public class Usuario {
 	private String usuarioErp;
 	
 	@Column(nullable = false)
+	private String senha;
+	
+	public String getSenha() {
+		return senha;
+	}
+
+	public void setSenha(String senha) {
+		this.senha = senha;
+	}
+
+	@Column(nullable = false)
 	private String nome;
 	
 	
