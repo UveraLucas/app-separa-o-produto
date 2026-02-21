@@ -10,10 +10,10 @@ class ApiService {
   // static const String baseUrl = 'http://10.0.2.2:8080/api'; 
   static const String baseUrl = 'http://127.0.0.1:8080/api'; 
 
-  // --- AUTENTICAÇÃO ---
+  /// --- AUTENTICAÇÃO ---
   Future<Usuario> login(String matricula, String senha) async {
     final uri = Uri.parse('$baseUrl/auth/login').replace(queryParameters: {
-      'matricula': matricula,
+      'matricula': matricula, // <-- A MÁGICA É AQUI! Mudamos para bater com o Java
       'senha': senha,
     });
 
@@ -36,6 +36,23 @@ class ApiService {
       return body.map((item) => Pedido.fromJson(item)).toList();
     } else {
       return [];
+    }
+  }
+
+  // --- ATUALIZAR STATUS DO PEDIDO ---
+  Future<bool> atualizarStatusPedido(int pedidoId, String novoStatus) async {
+    // Usamos queryParameters para enviar o ?status=EM_SEPARACAO
+    final uri = Uri.parse('$baseUrl/pedidos/$pedidoId/status').replace(queryParameters: {
+      'status': novoStatus, // <-- A CHAVE DEVE SER EXATAMENTE 'status'
+    });
+
+    final response = await http.put(uri);
+
+    if (response.statusCode == 200) {
+      return true; // Sucesso!
+    } else {
+      print('Erro 400: ${response.body}');
+      throw Exception('Falha ao atualizar status');
     }
   }
 
@@ -63,25 +80,28 @@ class ApiService {
     }
   }
 
-  Future<LogProdutividade> iniciarTrabalho(String matricula, String numeroPedido) async {
+// --- INICIAR SEPARAÇÃO ---
+  Future<LogProdutividade> iniciarSeparacao(String usuarioErp, String numeroErp) async {
     final uri = Uri.parse('$baseUrl/producao/iniciar').replace(queryParameters: {
-      'matricula': matricula,
-      'numeroPedido': numeroPedido,
+      'Usuario_erp': usuarioErp, 
+      'numeroPedido': numeroErp, // <-- Se o seu Java pedir 'pedidoId' em vez de numeroErp, me avise!
     });
 
-    final response = await http.post(uri);
+    final response = await http.post(uri); // ou http.put, dependendo do seu Java
 
-    if (response.statusCode == 200 || response.statusCode == 201) {
+    if (response.statusCode == 200) {
+      // Agora retornamos o objeto LogProdutividade, assim o logGerado.id vai funcionar!
       return LogProdutividade.fromJson(jsonDecode(response.body));
     } else {
-      throw Exception('Erro ao iniciar: ${response.body}');
+      throw Exception('Erro ao iniciar separação: ${response.body}');
     }
   }
+  
 
-  Future<LogProdutividade> finalizarTrabalho(int logId, int quantidade) async {
+ Future<LogProdutividade> finalizarTrabalho(int logId, int quantidade) async {
      final uri = Uri.parse('$baseUrl/producao/finalizar/$logId').replace(queryParameters: {
       'qtd': quantidade.toString(),
-    });
+   });
     
     final response = await http.post(uri);
     
@@ -90,5 +110,5 @@ class ApiService {
     } else {
         throw Exception('Erro: ${response.body}');
     }
-  }
+ }
 }

@@ -36,8 +36,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   Future<void> _iniciarTarefa(Pedido pedido, bool isSeparacao) async {
     try {
       // 1. Avisa o Backend que a tarefa começou (Gera Log e Muda Status)
-      final logGerado = await _api.iniciarTrabalho(
-        widget.usuario.usuarioErp, 
+      final logGerado = await _api.iniciarSeparacao(
+        widget.usuario.usuarioErp,
         pedido.numeroErp
       );
 
@@ -104,15 +104,27 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         }
 
         // Estado 3: Lista Vazia
+// Estado 3: Lista Vazia
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.inbox, size: 64, color: Colors.grey[300]),
-                const SizedBox(height: 10),
-                Text('Nenhum pedido "$status"', style: TextStyle(color: Colors.grey[600])),
-              ],
+          return RefreshIndicator(
+            onRefresh: () async => setState(() {}), // Puxar pra baixo atualiza
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(), // Força a tela a ser "puxável"
+              child: SizedBox(
+                height: MediaQuery.of(context).size.height * 0.7, // Ocupa a tela inteira
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.inbox, size: 64, color: Colors.grey[300]),
+                      const SizedBox(height: 10),
+                      Text('Nenhum pedido "$status"', style: TextStyle(color: Colors.grey[600], fontSize: 16)),
+                      const SizedBox(height: 20),
+                      Text('Puxe para baixo para atualizar ↓', style: TextStyle(color: Colors.grey[400], fontSize: 12)),
+                    ],
+                  ),
+                ),
+              ),
             ),
           );
         }
@@ -123,6 +135,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         return RefreshIndicator(
           onRefresh: () async => setState(() {}), // Puxar pra baixo atualiza
           child: ListView.builder(
+            physics: const AlwaysScrollableScrollPhysics(), // Garante que a lista também pode ser puxada
             padding: const EdgeInsets.all(8),
             itemCount: pedidos.length,
             itemBuilder: (context, index) {

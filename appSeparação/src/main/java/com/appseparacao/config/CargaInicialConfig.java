@@ -9,7 +9,7 @@ import com.appseparacao.model.Pedido;
 import com.appseparacao.repository.UsuarioRepository;
 import com.appseparacao.repository.PedidoRepository;
 
-import java.util.Arrays; // Importante para criar a lista de itens
+import java.util.Arrays;
 import java.util.Optional;
 
 @Configuration
@@ -25,7 +25,7 @@ public class CargaInicialConfig {
                 Usuario u = usuarioExistente.get();
                 u.setSenha("123456");
                 uRepo.save(u);
-                System.out.println(">>> Senha do usuário 'mestre' atualizada para 123456!");
+                System.out.println(">>> Senha do utilizador 'mestre' garantida para 123456!");
             } else {
                 Usuario u1 = new Usuario();
                 u1.setNome("Mestre do WMS");
@@ -33,13 +33,18 @@ public class CargaInicialConfig {
                 u1.setUsuarioErp("mestre");
                 u1.setSenha("123456");
                 uRepo.save(u1);
-                System.out.println(">>> Usuário 'mestre' criado com sucesso!");
+                System.out.println(">>> Utilizador 'mestre' criado com sucesso!");
             }
 
-            // --- 2. CONFIGURAÇÃO DOS PEDIDOS ---
-            if (pRepo.count() == 0) {
-                
-                // PEDIDO 1: Com Itens (Mouse e Teclado)
+            // --- 2. CONFIGURAÇÃO DOS PEDIDOS DE TESTE ---
+            
+            // PEDIDO 001
+// --- 2. CONFIGURAÇÃO DOS PEDIDOS DE TESTE ---
+            
+            // PEDIDO 001
+            Optional<Pedido> p1Existente = pRepo.findByNumeroErp("ERP-2026-001");
+            if (p1Existente.isEmpty()) {
+                // Se não existe, cria do zero
                 Pedido p1 = new Pedido();
                 p1.setNumeroErp("ERP-2026-001");
                 p1.setCliente("Logística Brasil S/A");
@@ -57,21 +62,43 @@ public class CargaInicialConfig {
                 i2.setQtdSolicitada(2);
                 i2.setPedido(p1);
 
-                // Usa Arrays.asList para evitar erros de versão do Java
                 p1.setItens(Arrays.asList(i1, i2));
-                
                 pRepo.save(p1);
-                System.out.println(">>> Pedido 001 criado com ITENS!");
-
-                // PEDIDO 2: Sem Itens (Para teste futuro)
-                Pedido p2 = new Pedido();
-                p2.setNumeroErp("ERP-2026-002");
-                p2.setCliente("Distribuidora PopOS");
-                p2.setStatus("PENDENTE");
-                
-                pRepo.save(p2);
-                System.out.println(">>> Pedido 002 criado!");
+            } else {
+                // SE JÁ EXISTE, FORÇA O STATUS DE VOLTA PARA PENDENTE PARA PODERMOS TESTAR
+                Pedido p1 = p1Existente.get();
+                p1.setStatus("PENDENTE");
+                pRepo.save(p1);
             }
-        }; // <--- AQUI É O FIM DA EXECUÇÃO (O return fecha aqui)
+
+            // NOVO PEDIDO 003
+            Optional<Pedido> p3Existente = pRepo.findByNumeroErp("ERP-2026-003");
+            if (p3Existente.isEmpty()) {
+                Pedido p3 = new Pedido();
+                p3.setNumeroErp("ERP-2026-003");
+                p3.setCliente("Tech Corp LTDA");
+                p3.setStatus("PENDENTE");
+
+                ItemPedido i3 = new ItemPedido();
+                i3.setDescricao("Monitor Ultrawide 29 LG");
+                i3.setCodigoBarras("111222333"); 
+                i3.setQtdSolicitada(1);
+                i3.setPedido(p3);
+
+                ItemPedido i4 = new ItemPedido();
+                i4.setDescricao("Headset Gamer HyperX");
+                i4.setCodigoBarras("444555666"); 
+                i4.setQtdSolicitada(3);
+                i4.setPedido(p3);
+
+                p3.setItens(Arrays.asList(i3, i4));
+                pRepo.save(p3);
+            } else {
+                 // SE JÁ EXISTE, FORÇA O STATUS DE VOLTA PARA PENDENTE
+                Pedido p3 = p3Existente.get();
+                p3.setStatus("PENDENTE");
+                pRepo.save(p3);
+            }
+        }; 
     }
 }
