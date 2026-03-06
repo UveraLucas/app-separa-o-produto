@@ -23,6 +23,7 @@ public class LogProdutividade {
 	private LocalDateTime dataInicio;
 	private LocalDateTime dataFim;
 	private Integer quantidadeItens;
+	private Integer qtdPedSeparados;
 	
 	@ManyToOne
 	@JoinColumn(name = "usuario_id")
