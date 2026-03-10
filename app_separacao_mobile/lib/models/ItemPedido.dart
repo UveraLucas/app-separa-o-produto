@@ -1,12 +1,13 @@
 // lib/models/ItemPedido.dart (Crie este arquivo se não tiver, ou adicione no pedido)
 
 class ItemPedido {
-  final int id;
-  final String codigoBarras;
-  final String descricao;
-  final int qtdSolicitada;
-  final int qtdSeparada;
-  final bool itemCortado; // Novo campo
+  int id;
+  String codigoBarras;
+  String descricao;
+  int qtdSolicitada;
+  int qtdSeparada;
+  String codPro; 
+  String unMed; 
 
   ItemPedido({
     required this.id,
@@ -14,7 +15,8 @@ class ItemPedido {
     required this.descricao,
     required this.qtdSolicitada,
     required this.qtdSeparada,
-    required this.itemCortado,
+    required this.codPro,
+    required this.unMed,
   });
 
   factory ItemPedido.fromJson(Map<String, dynamic> json) {
@@ -23,8 +25,9 @@ class ItemPedido {
       codigoBarras: json['codigoBarras'],
       descricao: json['descricao'],
       qtdSolicitada: json['qtdSolicitada'],
-      qtdSeparada: json['qtdSeparada'],
-      itemCortado: json['itemCortado'] ?? false, // Se vier nulo, assume falso
+      qtdSeparada: json['qtdSeparada'] ?? 0,
+      codPro: json['codigoProduto'] ?? 'N/A', 
+      unMed: json['unidadeMedida'] ?? 'UN',
     );
   }
 }

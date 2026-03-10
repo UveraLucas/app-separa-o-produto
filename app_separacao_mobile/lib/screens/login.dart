@@ -1,103 +1,148 @@
 import 'package:flutter/material.dart';
 import '../services/apiService.dart';
-import 'home_screen.dart'; // Certifique-se de ter criado este arquivo conforme conversamos antes
+import '../models/Usuario.dart';
+import 'homeScreen.dart';
+
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({Key? key}) : super(key: key);
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _matriculaController = TextEditingController(); // Login
-  final _senhaController = TextEditingController();     // Senha
-  final _apiService = ApiService();
+  final TextEditingController _usuarioController = TextEditingController();
+  final TextEditingController _senhaController = TextEditingController();
+  final ApiService _api = ApiService();
+  
   bool _isLoading = false;
 
   Future<void> _fazerLogin() async {
-    if (_matriculaController.text.isEmpty || _senhaController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Preencha login e senha!')));
+    // 1. Validação simples para não enviar vazio
+    if (_usuarioController.text.isEmpty || _senhaController.text.isEmpty) {
+      _mostrarErro('Preencha todos os campos!');
       return;
     }
 
     setState(() => _isLoading = true);
 
     try {
-      // Chama o endpoint de Autenticação
-      final usuario = await _apiService.login(
-        _matriculaController.text,
-        _senhaController.text,
+      // 2. Chama o Java que nós já configuramos perfeitamente
+      Usuario usuarioLogado = await _api.login(
+        _usuarioController.text.trim(),
+        _senhaController.text.trim(),
       );
 
       if (!mounted) return;
-
-      // Sucesso! Vai para a Home (Lista de Pedidos)
+      
+      // 3. Sucesso! Vai para a tela Home com o usuário
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => HomeScreen(usuario: usuario)),
+        MaterialPageRoute(
+          builder: (context) => HomeScreen(usuario: usuarioLogado),
+        ),
       );
-      
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro: ${e.toString().replaceAll('Exception:', '')}'), backgroundColor: Colors.red),
-      );
-    } finally {
       setState(() => _isLoading = false);
+      _mostrarErro('Credenciais inválidas ou erro no servidor.');
+
+      print('============= ERRO REAL DO LOGIN: $e =============');
+      
+      _mostrarErro('Credenciais inválidas ou erro no servidor.');
     }
+  }
+
+  void _mostrarErro(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg), backgroundColor: Colors.red),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.warehouse_rounded, size: 80, color: Colors.blue),
-            const SizedBox(height: 10),
-            const Text("WMS - Separação", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 40),
-            
-            // CAMPO MATRÍCULA
-            TextField(
-              controller: _matriculaController,
-              decoration: const InputDecoration(
-                labelText: 'Matrícula / Usuário',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.person),
+      backgroundColor: Colors.white, // Fundo branco
+      body: Center(
+        child: SingleChildScrollView( // Permite rolar a tela se o teclado abrir
+          padding: const EdgeInsets.all(32.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              
+              Image.asset(
+                'assets/aromasil.png',
+                height: 200,
+                fit: BoxFit.contain,
               ),
-            ),
-            const SizedBox(height: 16),
-            
-            // CAMPO SENHA (NOVO)
-            TextField(
-              controller: _senhaController,
-              obscureText: true, // Esconde a senha
-              decoration: const InputDecoration(
-                labelText: 'Senha',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.lock),
+              const SizedBox(height: 80),
+
+              // --- CAMPO DE USUÁRIO ---
+              TextField(
+                controller: _usuarioController,
+                decoration: InputDecoration(
+                  labelText: 'Usuário',
+                  prefixIcon: const Icon(Icons.person, color: Colors.blue),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12), // Cantos modernos
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 24),
-            
-            // BOTÃO ENTRAR
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: _isLoading ? null : _fazerLogin,
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.blue, foregroundColor: Colors.white),
-                child: _isLoading 
-                    ? const CircularProgressIndicator(color: Colors.white) 
-                    : const Text('ACESSAR SISTEMA', style: TextStyle(fontSize: 18)),
+              const SizedBox(height: 16),
+
+              // --- CAMPO DE SENHA ---
+              TextField(
+                controller: _senhaController,
+                obscureText: true, // Esconde a senha com pontinhos
+                decoration: InputDecoration(
+                  labelText: 'Senha',
+                  prefixIcon: const Icon(Icons.lock, color: Colors.blue),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 32),
+
+              // --- BOTÃO ENTRAR ---
+              SizedBox(
+                height: 50,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF004AAD), // Azul parecido com o da logo
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: _isLoading ? null : _fazerLogin,
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        )
+                      : const Text(
+                          'ENTRAR',
+                          style: TextStyle(
+                            fontSize: 18, 
+                            color: Colors.white, 
+                            fontWeight: FontWeight.bold
+                          ),
+                        ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+  
+  @override
+  void dispose() {
+    _usuarioController.dispose();
+    _senhaController.dispose();
+    super.dispose();
   }
 }

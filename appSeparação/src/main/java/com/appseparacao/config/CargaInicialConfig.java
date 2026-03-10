@@ -19,21 +19,21 @@ public class CargaInicialConfig {
     CommandLineRunner carregarDados(UsuarioRepository uRepo, PedidoRepository pRepo) {
         return args -> {
             // --- 1. CONFIGURAÇÃO DO USUÁRIO ---
-            Optional<Usuario> usuarioExistente = uRepo.findByUsuarioErp("mestre");
+            Optional<Usuario> usuarioExistente = uRepo.findByUsuarioErp("admin");
 
             if (usuarioExistente.isPresent()) {
                 Usuario u = usuarioExistente.get();
-                u.setSenha("123456");
+                u.setSenha("admin26");
                 uRepo.save(u);
-                System.out.println(">>> Senha do utilizador 'mestre' garantida para 123456!");
+                System.out.println(">>> Senha do utilizador 'admin' garantida para admin26!");
             } else {
                 Usuario u1 = new Usuario();
-                u1.setNome("Mestre do WMS");
+                u1.setNome("Administrador");
                 u1.setCargo("Separador Senior");
-                u1.setUsuarioErp("mestre");
-                u1.setSenha("123456");
+                u1.setUsuarioErp("admin");
+                u1.setSenha("admin26");
                 uRepo.save(u1);
-                System.out.println(">>> Utilizador 'mestre' criado com sucesso!");
+                System.out.println(">>> Utilizador 'Admin' criado com sucesso!");
             }
 
             // --- 2. CONFIGURAÇÃO DOS PEDIDOS DE TESTE ---
@@ -51,6 +51,7 @@ public class CargaInicialConfig {
                 p1.setStatus("PENDENTE");
 
                 ItemPedido i1 = new ItemPedido();
+                i1.setCodPro(null);
                 i1.setDescricao("Mouse Sem Fio Logitech");
                 i1.setCodigoBarras("789123456");
                 i1.setQtdSolicitada(5);
@@ -80,18 +81,24 @@ public class CargaInicialConfig {
                 p3.setStatus("PENDENTE");
 
                 ItemPedido i3 = new ItemPedido();
-                i3.setDescricao("Monitor Ultrawide 29 LG");
-                i3.setCodigoBarras("111222333"); 
+                i3.setDescricao("Talco Mentolado");
+                i3.setCodigoBarras("7896679224594"); 
                 i3.setQtdSolicitada(1);
                 i3.setPedido(p3);
 
                 ItemPedido i4 = new ItemPedido();
-                i4.setDescricao("Headset Gamer HyperX");
-                i4.setCodigoBarras("444555666"); 
+                i4.setDescricao("Removedor de Ceras");
+                i4.setCodigoBarras("7898436150764"); 
                 i4.setQtdSolicitada(3);
                 i4.setPedido(p3);
 
-                p3.setItens(Arrays.asList(i3, i4));
+                ItemPedido i5 = new ItemPedido();
+                i5.setDescricao("limpador rosas roubadas");
+                i5.setCodigoBarras("7898586619036"); 
+                i5.setQtdSolicitada(12);
+                i5.setPedido(p3);
+                
+                p3.setItens(Arrays.asList(i3, i4, i5));
                 pRepo.save(p3);
             } else {
                  // SE JÁ EXISTE, FORÇA O STATUS DE VOLTA PARA PENDENTE

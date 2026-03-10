@@ -2,113 +2,87 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/Usuario.dart';
 import '../models/Pedidos.dart';
-import '../models/ItemPedido.dart';
-import '../models/logProdutividade.dart';
+import '../models/logProdutividade.dart'; // Ajuste o nome do arquivo se necessário
 
 class ApiService {
-  // Ajuste o IP conforme necessário (10.0.2.2 para emulador, IP da máquina para USB)
-  // static const String baseUrl = 'http://10.0.2.2:8080/api'; 
-  static const String baseUrl = 'http://127.0.0.1:8080/api'; 
+  // Lembre-se de colocar o IP do seu computador aqui para testar no Wi-Fi!
+  static const String baseUrl = 'http://192.168.1.248:8080/api'; 
 
-  /// --- AUTENTICAÇÃO ---
-  Future<Usuario> login(String matricula, String senha) async {
+
+  Future<Usuario> login(String usuarioInput, String senha) async {
+    // 1. Aponta para a rota certa (/auth/login)
+    // 2. Envia como RequestParam usando o .replace(queryParameters)
     final uri = Uri.parse('$baseUrl/auth/login').replace(queryParameters: {
-      'matricula': matricula, // <-- A MÁGICA É AQUI! Mudamos para bater com o Java
+      'matricula': usuarioInput, // O Java exige que o nome seja 'matricula'
       'senha': senha,
     });
 
+    // 3. Dispara o POST vazio (pois os dados já foram na URL acima)
     final response = await http.post(uri);
 
     if (response.statusCode == 200) {
+      // Deu certo! Converte a resposta do Java de volta para o formato Flutter
       return Usuario.fromJson(jsonDecode(response.body));
     } else {
-      throw Exception('Login falhou: ${response.body}');
+      // Se a senha estiver errada, o Java vai mandar um Status 401
+      throw Exception('Falha no login: Status ${response.statusCode} - ${response.body}');
     }
   }
 
-  // --- PEDIDOS ---
+  // --- BUSCAR PEDIDOS DINAMICAMENTE POR STATUS ---
   Future<List<Pedido>> getPedidosPorStatus(String status) async {
     final uri = Uri.parse('$baseUrl/pedidos/listar/$status');
     final response = await http.get(uri);
 
     if (response.statusCode == 200) {
-      List<dynamic> body = jsonDecode(response.body);
-      return body.map((item) => Pedido.fromJson(item)).toList();
+      List<dynamic> jsonList = jsonDecode(response.body);
+      return jsonList.map((json) => Pedido.fromJson(json)).toList();
     } else {
-      return [];
+      throw Exception('Erro ao carregar pedidos: ${response.body}');
     }
   }
 
-  // --- ATUALIZAR STATUS DO PEDIDO ---
-  Future<bool> atualizarStatusPedido(int pedidoId, String novoStatus) async {
-    // Usamos queryParameters para enviar o ?status=EM_SEPARACAO
-    final uri = Uri.parse('$baseUrl/pedidos/$pedidoId/status').replace(queryParameters: {
-      'status': novoStatus, // <-- A CHAVE DEVE SER EXATAMENTE 'status'
-    });
-
-    final response = await http.put(uri);
-
-    if (response.statusCode == 200) {
-      return true; // Sucesso!
-    } else {
-      print('Erro 400: ${response.body}');
-      throw Exception('Falha ao atualizar status');
-    }
-  }
-
-  // --- ITENS E OPERAÇÃO ---
-  Future<List<ItemPedido>> getItensDoPedido(int pedidoId) async {
-    final uri = Uri.parse('$baseUrl/producao/$pedidoId/itens');
-    final response = await http.get(uri);
-
-    if (response.statusCode == 200) {
-      List<dynamic> body = jsonDecode(response.body);
-      return body.map((item) => ItemPedido.fromJson(item)).toList();
-    } else {
-      throw Exception('Erro ao carregar itens');
-    }
-  }
-
-  Future<void> biparProduto(int pedidoId, String codigoBarras) async {
-    final uri = Uri.parse('$baseUrl/producao/$pedidoId/bipar').replace(queryParameters: {
-      'codigoBarras': codigoBarras,
-    });
-    
-    final response = await http.post(uri);
-    if (response.statusCode != 200) {
-      throw Exception(response.body); 
-    }
-  }
-
-// --- INICIAR SEPARAÇÃO ---
-  Future<LogProdutividade> iniciarSeparacao(String usuarioErp, String numeroErp) async {
+  // --- INICIAR/RETOMAR SEPARAÇÃO ---
+  Future<LogProdutividade> iniciarSeparacao(String usuarioErp, String numeroPedido) async {
     final uri = Uri.parse('$baseUrl/producao/iniciar').replace(queryParameters: {
       'Usuario_erp': usuarioErp, 
-      'numeroPedido': numeroErp, // <-- Se o seu Java pedir 'pedidoId' em vez de numeroErp, me avise!
+      'numeroPedido': numeroPedido, 
     });
 
-    final response = await http.post(uri); // ou http.put, dependendo do seu Java
+    final response = await http.post(uri);
 
     if (response.statusCode == 200) {
-      // Agora retornamos o objeto LogProdutividade, assim o logGerado.id vai funcionar!
       return LogProdutividade.fromJson(jsonDecode(response.body));
     } else {
       throw Exception('Erro ao iniciar separação: ${response.body}');
     }
   }
-  
 
- Future<LogProdutividade> finalizarTrabalho(int logId, int quantidade) async {
-     final uri = Uri.parse('$baseUrl/producao/finalizar/$logId').replace(queryParameters: {
-      'qtd': quantidade.toString(),
-   });
-    
+  // --- BIPAR PRODUTO ---
+  Future<void> biparProduto(int pedidoId, String codigoBarras) async {
+    final uri = Uri.parse('$baseUrl/producao/bipar').replace(queryParameters: {
+      'pedidoId': pedidoId.toString(),
+      'codigoBarras': codigoBarras,
+    });
+
     final response = await http.post(uri);
-    
-    if (response.statusCode == 200) {
-        return LogProdutividade.fromJson(jsonDecode(response.body));
-    } else {
-        throw Exception('Erro: ${response.body}');
+
+    if (response.statusCode != 200) {
+      throw Exception('Erro ao bipar: ${response.body}');
     }
- }
+  }
+
+  // --- FINALIZAR TRABALHO ---
+  Future<void> finalizarTrabalho(int logId, int totalSeparado) async {
+    final uri = Uri.parse('$baseUrl/producao/finalizar').replace(queryParameters: {
+      'logId': logId.toString(),
+      'totalSeparado': totalSeparado.toString(),
+    });
+
+    final response = await http.post(uri);
+
+    if (response.statusCode != 200) {
+      throw Exception('Erro ao finalizar: ${response.body}');
+    }
+  }
 }

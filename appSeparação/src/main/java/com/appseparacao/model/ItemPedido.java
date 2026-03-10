@@ -14,7 +14,8 @@ public class ItemPedido {
     private String descricao;    // Ex: "Teclado USB"
     private Integer qtdSolicitada; // O que o ERP pediu (Ex: 10)
     private Integer qtdSeparada = 0; // O que o separador já bipou (Começa com 0)
-
+    private Integer codPro; //código produto
+    private Integer unMed; // unidade medida vincula ao produto
     @ManyToOne
     @JoinColumn(name = "pedido_id")
     @JsonIgnore // O item sabe quem é o pedido, mas ao listar o pedido, não queremos repetir o pedido dentro do item
@@ -41,4 +42,9 @@ public class ItemPedido {
     public void setQtdSeparada(Integer qtdSeparada) { this.qtdSeparada = qtdSeparada; }
     public Pedido getPedido() { return pedido; }
     public void setPedido(Pedido pedido) { this.pedido = pedido; }
+	public Integer getCodPro() {return codPro;}
+	public void setCodPro(Integer codPro) {this.codPro = codPro;}
+	public Integer getUnMed() {return unMed;}
+	public void setUnMed(Integer unMed) {this.unMed = unMed;}
+    
 }
