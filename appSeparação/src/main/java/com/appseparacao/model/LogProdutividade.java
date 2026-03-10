@@ -23,9 +23,7 @@ public class LogProdutividade {
 	private LocalDateTime dataInicio;
 	private LocalDateTime dataFim;
 	private Integer quantidadeItens;
-	private Integer qtdPedSep;
-	private Integer valorSep;
-	
+	private Integer qtdPedSeparados;
 	
 	@ManyToOne
 	@JoinColumn(name = "usuario_id")
@@ -98,22 +96,6 @@ public class LogProdutividade {
 
 	public void setQuantidadeItens(Integer quantidadeItens) {
 		this.quantidadeItens = quantidadeItens;
-	}
-
-	public Integer getQtdPedSep() {
-		return qtdPedSep;
-	}
-
-	public void setQtdPedSep(Integer qtdPedSep) {
-		this.qtdPedSep = qtdPedSep;
-	}
-
-	public Integer getValorSep() {
-		return valorSep;
-	}
-
-	public void setValorSep(Integer valorSep) {
-		this.valorSep = valorSep;
 	}
 	
 
