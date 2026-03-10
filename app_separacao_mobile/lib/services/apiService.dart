@@ -58,10 +58,10 @@ class ApiService {
     }
   }
 
-  // --- BIPAR PRODUTO ---
+// --- BIPAR PRODUTO ---
   Future<void> biparProduto(int pedidoId, String codigoBarras) async {
-    final uri = Uri.parse('$baseUrl/producao/bipar').replace(queryParameters: {
-      'pedidoId': pedidoId.toString(),
+    // CORREÇÃO: Colocamos o pedidoId diretamente dentro da URL (PathVariable)
+    final uri = Uri.parse('$baseUrl/producao/$pedidoId/bipar').replace(queryParameters: {
       'codigoBarras': codigoBarras,
     });
 
@@ -74,9 +74,10 @@ class ApiService {
 
   // --- FINALIZAR TRABALHO ---
   Future<void> finalizarTrabalho(int logId, int totalSeparado) async {
-    final uri = Uri.parse('$baseUrl/producao/finalizar').replace(queryParameters: {
-      'logId': logId.toString(),
-      'totalSeparado': totalSeparado.toString(),
+    // CORREÇÃO 1: logId vai direto na URL (PathVariable)
+    // CORREÇÃO 2: O Java exige que o nome da variável de quantidade seja 'qtd'
+    final uri = Uri.parse('$baseUrl/producao/finalizar/$logId').replace(queryParameters: {
+      'qtd': totalSeparado.toString(), 
     });
 
     final response = await http.post(uri);

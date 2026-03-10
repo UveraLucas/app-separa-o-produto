@@ -34,7 +34,6 @@ class _ListaPedidosScreenState extends State<ListaPedidosScreen> {
   Future<void> _carregarPedidos() async {
     setState(() => _isLoading = true);
     try {
-      // Chama a API enviando o status exato que a tela pediu
       final pedidosDaApi = await _api.getPedidosPorStatus(widget.statusBusca);
       
       setState(() {
@@ -70,6 +69,7 @@ class _ListaPedidosScreenState extends State<ListaPedidosScreen> {
       );
 
       // Quando o operador voltar da tela de bipar, atualiza a lista automaticamente
+      // fazendo o pedido sumir caso ele tenha sido finalizado!
       _carregarPedidos();
 
     } catch (e) {
@@ -116,39 +116,87 @@ class _ListaPedidosScreenState extends State<ListaPedidosScreen> {
                       itemCount: _pedidos.length,
                       itemBuilder: (context, index) {
                         final pedido = _pedidos[index];
+                        
+                        // Verifica se o pedido já começou a ser separado
+                        bool emAndamento = pedido.status == 'EM_SEPARACAO' || pedido.status == 'EM_SEPARAÇÃO' || pedido.status == 'EM_CONFERENCIA';
+
                         return Card(
                           elevation: 2,
                           margin: const EdgeInsets.only(bottom: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12)
                           ),
-                          child: ListTile(
-                            contentPadding: const EdgeInsets.all(16),
-                            leading: const CircleAvatar(
-                              backgroundColor: Colors.blue,
-                              child: Icon(Icons.assignment, color: Colors.white),
-                            ),
-                            title: Text(
-                              pedido.numeroErp,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 18
+                          clipBehavior: Clip.hardEdge, // Faz o efeito de clique respeitar a borda arredondada
+                          child: InkWell(
+                            onTap: () => _abrirPedido(pedido), // Ação ao clicar em qualquer lugar do cartão
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.all(16),
+                              
+                              // Ícone muda de cor se já estiver em andamento
+                              leading: CircleAvatar(
+                                backgroundColor: emAndamento ? Colors.orange : Colors.blue,
+                                child: Icon(
+                                  emAndamento ? Icons.play_arrow : Icons.local_shipping, 
+                                  color: Colors.white
+                                ),
                               ),
-                            ),
-                            subtitle: Padding(
-                              padding: const EdgeInsets.only(top: 8.0),
-                              child: Text('Itens: ${pedido.itens.length}'),
-                            ),
-                            trailing: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: widget.statusBusca == 'EM_SEPARACAO' 
-                                    ? Colors.orange // Laranja se for retomar
-                                    : Colors.blue, // Azul se for começar novo
+                              
+                              title: Text(
+                                'Pedido: ${pedido.numeroErp}',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold, 
+                                  fontSize: 18,
+                                  color: emAndamento ? Colors.orange[800] : const Color(0xFF004AAD),
+                                ),
                               ),
-                              onPressed: () => _abrirPedido(pedido),
-                              child: Text(
-                                widget.statusBusca == 'EM_SEPARACAO' ? 'CONTINUAR' : 'INICIAR', 
-                                style: const TextStyle(color: Colors.white)
+                              
+                              subtitle: Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Icon(Icons.person, size: 16, color: Colors.grey),
+                                        const SizedBox(width: 6),
+                                        Expanded(
+                                          child: Text(
+                                            '${pedido.codigoCliente} - ${pedido.nomeCliente}',
+                                            style: const TextStyle(
+                                              fontSize: 15, 
+                                              color: Colors.black87,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.location_on, size: 16, color: Colors.grey),
+                                        const SizedBox(width: 6),
+                                        Expanded(
+                                          child: Text(
+                                            '${pedido.cidade} - ${pedido.estado}',
+                                            style: const TextStyle(
+                                              fontSize: 14, 
+                                              color: Colors.black54,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
+                              
+                              // Adiciona uma setinha no final indicando que é clicável (substituindo o botão)
+                              trailing: const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 20),
                             ),
                           ),
                         );

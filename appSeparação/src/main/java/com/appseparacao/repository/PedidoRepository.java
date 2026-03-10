@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     // Para listar o que o colaborador ainda precisa separar
-    List<Pedido> findByStatus(String status);
+    List<Pedido> findByStatusIn(List<String> statuses);
 
     // Para buscar um pedido específico vindo do ERP
     Optional<Pedido> findByNumeroErp(String numeroErp);

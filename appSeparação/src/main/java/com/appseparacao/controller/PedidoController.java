@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,9 +18,15 @@ public class PedidoController {
     @Autowired
     private PedidoRepository pedidoRepository;
 
-    @GetMapping("/listar/{status}") // <-- ISSO COMPLETA A URL
-    public List<Pedido> listarPorStatus(@PathVariable String status) {
-        return pedidoRepository.findByStatus(status);
+    @GetMapping("/listar/{status}")
+    public ResponseEntity<List<Pedido>> listarPedidos(@PathVariable String status) {
+        // Pega a string que vem do Flutter (ex: "PENDENTE,EM_SEPARAÇÃO") e divide na vírgula
+        List<String> listaStatus = Arrays.asList(status.split(","));
+        
+        // Usa o novo método do repositório para buscar todos de uma vez
+        List<Pedido> pedidos = pedidoRepository.findByStatusIn(listaStatus);
+        
+        return ResponseEntity.ok(pedidos);
     }
     
  // Adicione ou substitua este método dentro do seu PedidoController

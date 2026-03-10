@@ -18,7 +18,10 @@ public class Pedido {
 	@Column(nullable = false, unique = true)
 	private String numeroErp;
 	
-	private String cliente;
+	private String codigoCliente;
+	private String nomeCliente;
+	private String cidade;
+	private String estado;
 	
 	@Column(nullable = false)
 	private String status; //pendente, separação, concluido
@@ -54,14 +57,31 @@ public class Pedido {
 		this.numeroErp = numeroErp;
 	}
 
-	public String getCliente() {
-		return cliente;
-	}
 
-	public void setCliente(String cliente) {
-		this.cliente = cliente;
+	public String getCodigoCliente() {
+		return codigoCliente;
 	}
-
+	public void setCodigoCliente(String codigoCliente) {
+		this.codigoCliente = codigoCliente;
+	}
+	public String getNomeCliente() {
+		return nomeCliente;
+	}
+	public void setNomeCliente(String nomeCliente) {
+		this.nomeCliente = nomeCliente;
+	}
+	public String getCidade() {
+		return cidade;
+	}
+	public void setCidade(String cidade) {
+		this.cidade = cidade;
+	}
+	public String getEstado() {
+		return estado;
+	}
+	public void setEstado(String estado) {
+		this.estado = estado;
+	}
 	public String getStatus() {
 		return status;
 	}

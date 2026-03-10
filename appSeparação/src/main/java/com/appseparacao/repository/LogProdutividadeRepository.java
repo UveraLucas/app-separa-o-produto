@@ -1,8 +1,12 @@
 package com.appseparacao.repository;
-import org.springframework.data.jpa.repository.JpaRepository;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import com.appseparacao.model.LogProdutividade;
+import com.appseparacao.model.Pedido;
+import com.appseparacao.model.Usuario;
 
 public interface LogProdutividadeRepository extends JpaRepository<LogProdutividade, Long> {
-    // Aqui você pode criar métodos customizados futuramente, como buscar por colaborador
+    
+    // BUSCA O ÚLTIMO LOG ABERTO DESSE PEDIDO PARA ESSE USUÁRIO
+    LogProdutividade findFirstByPedidoAndUsuarioOrderByDataInicioDesc(Pedido pedido, Usuario usuario);
 }

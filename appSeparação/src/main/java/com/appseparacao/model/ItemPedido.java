@@ -16,14 +16,16 @@ public class ItemPedido {
     private Integer qtdSeparada = 0; // O que o separador já bipou (Começa com 0)
     private Integer codPro; //código produto
     private Integer unMed; // unidade medida vincula ao produto
+    
+
     @ManyToOne
     @JoinColumn(name = "pedido_id")
     @JsonIgnore // O item sabe quem é o pedido, mas ao listar o pedido, não queremos repetir o pedido dentro do item
     private Pedido pedido;
    
-
-    @Column(columnDefinition = "boolean default false")
     private Boolean itemCortado = false; // Novo campo
+    
+    private Double precoUnitario = 0.0;
 
     // Getters e Setters
     public Boolean getItemCortado() { return itemCortado; }
@@ -46,5 +48,8 @@ public class ItemPedido {
 	public void setCodPro(Integer codPro) {this.codPro = codPro;}
 	public Integer getUnMed() {return unMed;}
 	public void setUnMed(Integer unMed) {this.unMed = unMed;}
+	public Double getPrecoUnitario() {return precoUnitario;}
+	public void setPrecoUnitario(Double precoUnitario) {this.precoUnitario = precoUnitario;}
+	
     
 }

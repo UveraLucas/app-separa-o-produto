@@ -47,7 +47,10 @@ public class CargaInicialConfig {
                 // Se não existe, cria do zero
                 Pedido p1 = new Pedido();
                 p1.setNumeroErp("ERP-2026-001");
-                p1.setCliente("Logística Brasil S/A");
+                p1.setCodigoCliente("CLI-1001");
+                p1.setNomeCliente("Logística Brasil S/A");
+                p1.setCidade("São Paulo");
+                p1.setEstado("SP");
                 p1.setStatus("PENDENTE");
 
                 ItemPedido i1 = new ItemPedido();
@@ -77,7 +80,10 @@ public class CargaInicialConfig {
             if (p3Existente.isEmpty()) {
                 Pedido p3 = new Pedido();
                 p3.setNumeroErp("ERP-2026-003");
-                p3.setCliente("Tech Corp LTDA");
+                p3.setCodigoCliente("CLI-2050");
+                p3.setNomeCliente("Tech Corp LTDA");
+                p3.setCidade("Belo Horizonte");
+                p3.setEstado("MG");
                 p3.setStatus("PENDENTE");
 
                 ItemPedido i3 = new ItemPedido();

@@ -24,6 +24,7 @@ public class LogProdutividade {
 	private LocalDateTime dataFim;
 	private Integer quantidadeItens;
 	private Integer qtdPedSeparados;
+	private Double valorTotalProcessado = 0.0;
 	
 	@ManyToOne
 	@JoinColumn(name = "usuario_id")
@@ -96,6 +97,27 @@ public class LogProdutividade {
 
 	public void setQuantidadeItens(Integer quantidadeItens) {
 		this.quantidadeItens = quantidadeItens;
+	}
+
+	public void setValorTotalProcessado(double valorDaTarefa) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public Double getValorTotalProcessado() {
+		return valorTotalProcessado;
+	}
+
+	public void setValorTotalProcessado(Double valorTotalProcessado) {
+		this.valorTotalProcessado = valorTotalProcessado;
+	}
+
+	public Integer getQtdPedSeparados() {
+		return qtdPedSeparados;
+	}
+
+	public void setQtdPedSeparados(Integer qtdPedSeparados) {
+		this.qtdPedSeparados = qtdPedSeparados;
 	}
 	
 

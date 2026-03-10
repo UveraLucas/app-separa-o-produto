@@ -97,7 +97,7 @@ class HomeScreen extends StatelessWidget {
                           builder: (context) => ListaPedidosScreen(
                             usuario: usuario,
                             titulo: 'Pedidos em Separação',
-                            statusBusca: 'EM_SEPARACAO', 
+                            statusBusca: 'PENDENTE,EM_SEPARACAO', 
                           ),
                         ),
                       );
@@ -117,7 +117,7 @@ class HomeScreen extends StatelessWidget {
                           builder: (context) => ListaPedidosScreen(
                             usuario: usuario,
                             titulo: 'Pedidos para Conferência',
-                            statusBusca: 'SEPARADO', 
+                            statusBusca: 'AGUARDANDO_CONFERENCIA, EM_CONFERENCIA', 
                           ),
                         ),
                       );
